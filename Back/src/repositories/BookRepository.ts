@@ -6,6 +6,7 @@ export interface Book {
   author: string;
   published_date: string;
   book_description: string;
+  book_img: string; // TODO: Move image storage to an S3 bucket/CDN and store only the URL here
   created_at?: Date;
   updated_at?: Date;
 }
