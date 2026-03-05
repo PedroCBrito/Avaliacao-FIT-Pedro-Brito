@@ -1,0 +1,14 @@
+# Dependency directories
+node_modules/
+
+# Environment variables
+.env
+
+# Testing
+coverage/
+
+# Production build outputs
+dist/
+dist-ssr/
+build/
+
