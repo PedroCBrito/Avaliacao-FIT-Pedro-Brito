@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeAll, beforeEach, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 
-// ─── Mock the repository before any app import ───────────────────────────────
-const { mockRepository } = vi.hoisted(() => {
+// ─── Mock the service before any app import ───────────────────────────────────
+const { mockService } = vi.hoisted(() => {
   return {
-    mockRepository: {
+    mockService: {
       listAll: vi.fn(),
       findById: vi.fn(),
       create: vi.fn(),
@@ -14,15 +14,16 @@ const { mockRepository } = vi.hoisted(() => {
   };
 });
 
-vi.mock('../../repositories/BookRepository', () => {
+vi.mock('../../services/BookService', () => {
   return {
-    BookRepository: function () {
-      return mockRepository;
+    BookService: function () {
+      return mockService;
     },
   };
 });
 
-// Also mock the DB connection so it never touches a real database
+// Mock repository and DB so no real DB connection is attempted
+vi.mock('../../repositories/BookRepository', () => ({ BookRepository: function () { return {}; } }));
 vi.mock('../../database/connection', () => ({ default: vi.fn() }));
 
 import { buildApp } from '../helpers/buildApp';
@@ -63,18 +64,18 @@ describe('Book Routes', () => {
   // ═══════════════════════════════════════════════════════════════════════════
   describe('GET /books', () => {
     it('should return an empty array when there are no books', async () => {
-      mockRepository.listAll.mockResolvedValueOnce([]);
+      mockService.listAll.mockResolvedValueOnce([]);
 
       const response = await app.inject({ method: 'GET', url: '/books' });
 
       expect(response.statusCode).toBe(200);
       expect(response.json()).toEqual([]);
-      expect(mockRepository.listAll).toHaveBeenCalledOnce();
+      expect(mockService.listAll).toHaveBeenCalledOnce();
     });
 
     it('should return a list of books', async () => {
       const books = [savedBook, { ...savedBook, id: 'def-456', title: 'The Pragmatic Programmer' }];
-      mockRepository.listAll.mockResolvedValueOnce(books);
+      mockService.listAll.mockResolvedValueOnce(books);
 
       const response = await app.inject({ method: 'GET', url: '/books' });
 
@@ -84,8 +85,8 @@ describe('Book Routes', () => {
       expect(response.json()).toHaveLength(2);
     });
 
-    it('should return 500 when the repository throws an error', async () => {
-      mockRepository.listAll.mockRejectedValueOnce(new Error('DB connection failed'));
+    it('should return 500 when the service throws an error', async () => {
+      mockService.listAll.mockRejectedValueOnce(new Error('DB connection failed'));
 
       const response = await app.inject({ method: 'GET', url: '/books' });
 
@@ -99,7 +100,7 @@ describe('Book Routes', () => {
   // ═══════════════════════════════════════════════════════════════════════════
   describe('GET /books/:id', () => {
     it('should return a book when found', async () => {
-      mockRepository.findById.mockResolvedValueOnce(savedBook);
+      mockService.findById.mockResolvedValueOnce(savedBook);
 
       const response = await app.inject({
         method: 'GET',
@@ -109,11 +110,11 @@ describe('Book Routes', () => {
       expect(response.statusCode).toBe(200);
       expect(response.headers['content-type']).toMatch(/application\/json/);
       expect(response.json()).toEqual(savedBook);
-      expect(mockRepository.findById).toHaveBeenCalledWith('abc-123');
+      expect(mockService.findById).toHaveBeenCalledWith('abc-123');
     });
 
     it('should return 404 when the book is not found', async () => {
-      mockRepository.findById.mockResolvedValueOnce(null);
+      mockService.findById.mockResolvedValueOnce(null);
 
       const response = await app.inject({
         method: 'GET',
@@ -124,8 +125,8 @@ describe('Book Routes', () => {
       expect(response.json()).toEqual({ message: 'Book not found' });
     });
 
-    it('should return 500 when the repository throws an error', async () => {
-      mockRepository.findById.mockRejectedValueOnce(new Error('DB error'));
+    it('should return 500 when the service throws an error', async () => {
+      mockService.findById.mockRejectedValueOnce(new Error('DB error'));
 
       const response = await app.inject({
         method: 'GET',
@@ -142,7 +143,7 @@ describe('Book Routes', () => {
   // ═══════════════════════════════════════════════════════════════════════════
   describe('POST /books', () => {
     it('should create a book with valid data and return 201', async () => {
-      mockRepository.create.mockResolvedValueOnce(savedBook);
+      mockService.create.mockResolvedValueOnce(savedBook);
 
       const response = await app.inject({
         method: 'POST',
@@ -154,12 +155,12 @@ describe('Book Routes', () => {
       expect(response.headers['content-type']).toMatch(/application\/json/);
       expect(response.json()).toEqual(savedBook);
       expect(response.json()).toHaveProperty('id');
-      expect(mockRepository.create).toHaveBeenCalledWith(validBook);
+      expect(mockService.create).toHaveBeenCalledWith(validBook);
     });
 
     it('should accept an optional id field', async () => {
       const bookWithId = { id: 'custom-id', ...validBook };
-      mockRepository.create.mockResolvedValueOnce({ ...savedBook, id: 'custom-id' });
+      mockService.create.mockResolvedValueOnce({ ...savedBook, id: 'custom-id' });
 
       const response = await app.inject({
         method: 'POST',
@@ -168,7 +169,7 @@ describe('Book Routes', () => {
       });
 
       expect(response.statusCode).toBe(201);
-      expect(mockRepository.create).toHaveBeenCalledWith(bookWithId);
+      expect(mockService.create).toHaveBeenCalledWith(bookWithId);
     });
 
     it('should return 400 when body is empty', async () => {
@@ -203,8 +204,8 @@ describe('Book Routes', () => {
       expect(body.errors).toHaveProperty('book_description');
     });
 
-    it('should return 500 when repository.create throws', async () => {
-      mockRepository.create.mockRejectedValueOnce(new Error('Insert failed'));
+    it('should return 500 when service.create throws', async () => {
+      mockService.create.mockRejectedValueOnce(new Error('Insert failed'));
 
       const response = await app.inject({
         method: 'POST',
@@ -223,7 +224,7 @@ describe('Book Routes', () => {
   describe('PUT /books/:id', () => {
     it('should update a book with valid data', async () => {
       const updatedBook = { ...savedBook, title: 'Clean Code 2nd Ed' };
-      mockRepository.update.mockResolvedValueOnce(updatedBook);
+      mockService.update.mockResolvedValueOnce(updatedBook);
 
       const response = await app.inject({
         method: 'PUT',
@@ -234,11 +235,11 @@ describe('Book Routes', () => {
       expect(response.statusCode).toBe(200);
       expect(response.headers['content-type']).toMatch(/application\/json/);
       expect(response.json()).toEqual(updatedBook);
-      expect(mockRepository.update).toHaveBeenCalledWith({ ...validBook, id: 'abc-123', title: 'Clean Code 2nd Ed' });
+      expect(mockService.update).toHaveBeenCalledWith('abc-123', { id: 'abc-123', ...validBook, title: 'Clean Code 2nd Ed' });
     });
 
     it('should return 404 when the book to update does not exist', async () => {
-      mockRepository.update.mockResolvedValueOnce(undefined);
+      mockService.update.mockResolvedValueOnce(undefined);
 
       const response = await app.inject({
         method: 'PUT',
@@ -260,8 +261,8 @@ describe('Book Routes', () => {
       expect(response.json().message).toBe('Validation Error');
     });
 
-    it('should return 500 when repository.update throws', async () => {
-      mockRepository.update.mockRejectedValueOnce(new Error('Update failed'));
+    it('should return 500 when service.update throws', async () => {
+      mockService.update.mockRejectedValueOnce(new Error('Update failed'));
 
       const response = await app.inject({
         method: 'PUT',
@@ -279,7 +280,7 @@ describe('Book Routes', () => {
   // ═══════════════════════════════════════════════════════════════════════════
   describe('DELETE /books/:id', () => {
     it('should delete a book and return 204', async () => {
-      mockRepository.delete.mockResolvedValueOnce(1);
+      mockService.delete.mockResolvedValueOnce(1);
 
       const response = await app.inject({
         method: 'DELETE',
@@ -287,12 +288,12 @@ describe('Book Routes', () => {
       });
 
       expect(response.statusCode).toBe(204);
-      expect(mockRepository.delete).toHaveBeenCalledWith('abc-123');
+      expect(mockService.delete).toHaveBeenCalledWith('abc-123');
       expect(response.body).toBe('');
     });
 
     it('should return 204 even when book does not exist (no rows deleted)', async () => {
-      mockRepository.delete.mockResolvedValueOnce(0);
+      mockService.delete.mockResolvedValueOnce(0);
 
       const response = await app.inject({
         method: 'DELETE',
@@ -303,8 +304,8 @@ describe('Book Routes', () => {
       expect(response.statusCode).toBe(204);
     });
 
-    it('should return 500 when repository.delete throws', async () => {
-      mockRepository.delete.mockRejectedValueOnce(new Error('Delete failed'));
+    it('should return 500 when service.delete throws', async () => {
+      mockService.delete.mockRejectedValueOnce(new Error('Delete failed'));
 
       const response = await app.inject({
         method: 'DELETE',
