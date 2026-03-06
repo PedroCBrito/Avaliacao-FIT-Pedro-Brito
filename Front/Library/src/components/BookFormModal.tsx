@@ -1,10 +1,11 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { z } from 'zod';
 import Modal from './ui/Modal';
 import FormField from './ui/FormField';
 import ModalButton from './ui/ModalButton';
 import ImageUpload from './ui/ImageUpload';
 import { bookSchema, type BookInput } from '../schemas/book.schemas';
+import { toInputDate } from '../lib/dateUtils';
 
 const INPUT_BASE =
     'bg-white w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 transition    h-12';
@@ -21,14 +22,25 @@ interface AddBookModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (data: BookInput) => Promise<unknown>;
+    initialData?: BookInput;
 }
 
-function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModalProps) {
-    const [form, setForm] = useState<BookInput>(EMPTY_FORM);
+function normalizeInitialData(data?: BookInput): BookInput {
+    if (!data) return EMPTY_FORM;
+    return {
+        ...data,
+        published_date: data.published_date ? toInputDate(data.published_date) : '',
+    };
+}
+
+function BookFormModal({ isOpen, onClose, onSubmit, initialData }: AddBookModalProps) {
+    const [form, setForm] = useState<BookInput>(() => normalizeInitialData(initialData));
     const [errors, setErrors] = useState<Partial<Record<keyof BookInput, string>>>({});
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(initialData?.book_img ?? null);
     const [submitting, setSubmitting] = useState(false);
-    const [dateInputType, setDateInputType] = useState<'text' | 'date'>('text');
+    const [dateInputType, setDateInputType] = useState<'text' | 'date'>(
+        initialData?.published_date ? 'date' : 'text'
+    );
 
     const isFormComplete =
         form.title.trim() !== '' &&
@@ -37,13 +49,22 @@ function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModalProps) {
         form.book_description.trim() !== '' &&
         form.book_img !== '';
 
+    useEffect(() => {
+        if (isOpen) {
+            setForm(normalizeInitialData(initialData));
+            setErrors({});
+            setImagePreview(initialData?.book_img ?? null);
+            setDateInputType(initialData?.published_date ? 'date' : 'text');
+        }
+    }, [isOpen, initialData]);
+
     const handleClose = useCallback(() => {
-        setForm(EMPTY_FORM);
+        setForm(normalizeInitialData(initialData));
         setErrors({});
-        setImagePreview(null);
-        setDateInputType('text');
+        setImagePreview(initialData?.book_img ?? null);
+        setDateInputType(initialData?.published_date ? 'date' : 'text');
         onClose();
-    }, [onClose]);
+    }, [onClose, initialData]);
 
     const handleChange =
         (field: keyof BookInput) =>
@@ -86,7 +107,7 @@ function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModalProps) {
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} title="Novo Livro">
+        <Modal isOpen={isOpen} onClose={handleClose} title={initialData ? 'Editar Livro' : 'Novo Livro'}>
             <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
                 <div className="flex gap-5">
                     <div className="flex flex-col gap-4 flex-[2]">
@@ -158,4 +179,4 @@ function AddBookModal({ isOpen, onClose, onSubmit }: AddBookModalProps) {
     );
 }
 
-export default AddBookModal;
+export default BookFormModal;

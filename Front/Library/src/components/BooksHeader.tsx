@@ -4,9 +4,10 @@ import SearchBar from './SearchBar';
 
 interface BooksHeaderProps {
     onAddBook: () => void;
+    onSearch: (query: string) => void;
 }
 
-function BooksHeader({ onAddBook }: BooksHeaderProps) {
+function BooksHeader({ onAddBook, onSearch }: BooksHeaderProps) {
     return (
         <div className="mb-6">
             <nav className="flex items-center justify-between pb-4 mb-6">
@@ -18,7 +19,7 @@ function BooksHeader({ onAddBook }: BooksHeaderProps) {
                 </div>
             </nav>
 
-            <SearchBar className="w-full" />
+            <SearchBar className="w-full" onChange={(e) => onSearch(e.target.value)} />
         </div>
     );
 }
