@@ -29,7 +29,7 @@ function BookMeta({ author, published_date }: { author: string; published_date: 
     return (
         <div className="flex items-start justify-between">
             <div>
-                <p className="text-base font-lg text-black">Por {author}</p>
+                <p className="text-base text-black">Por {author}</p>
             </div>
             <div className="text-right">
                 <p className="text-base text-lg text-black">Publicado em {formattedDate}</p>

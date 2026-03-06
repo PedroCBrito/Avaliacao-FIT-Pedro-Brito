@@ -1,21 +1,23 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useBooks } from '../hooks/useBooks';
+import { useState, useMemo, useEffect } from 'react';
+import { useBookList } from '../hooks/useBooks';
 import BooksContainer from '../components/BooksContainer';
-import BooksHeader from '../components/BooksHeader';
-import BookFormModal from '../components/BookFormModal';
+import BooksHeader from '../components/header/BooksHeader';
+import BookFormModal from '../components/modal/BookFormModal';
 
 function BooksPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const { books, loading, error, fetchBooks, createBook } = useBooks();
+    const [debouncedQuery, setDebouncedQuery] = useState('');
+    const { books, loading, error, createBook } = useBookList();
 
     useEffect(() => {
-        fetchBooks().catch(() => {});
-    }, [fetchBooks]);
+        const timer = setTimeout(() => setDebouncedQuery(searchQuery.trim()), 300);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
 
     const filteredBooks = useMemo(
-        () => books.filter((b) => b.title.toLowerCase().includes(searchQuery.toLowerCase())),
-        [books, searchQuery]
+        () => books.filter((b) => b.title.toLowerCase().includes(debouncedQuery.toLowerCase())),
+        [books, debouncedQuery]
     );
 
     return (

@@ -6,6 +6,7 @@ const validData = {
   author: 'Robert C. Martin',
   published_date: '2008-08-01',
   book_description: 'A Handbook of Agile Software Craftsmanship',
+  book_img: 'https://example.com/clean-code.jpg',
 };
 
 describe('bookSchema', () => {
@@ -203,9 +204,9 @@ describe('bookSchema', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should accept a very long title', () => {
+    it('should reject when title exceeds 255 characters', () => {
       const result = bookSchema.safeParse({ ...validData, title: 'A'.repeat(500) });
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
     });
 
     it('should accept a very long description', () => {

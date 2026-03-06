@@ -1,11 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import { z } from 'zod';
-import Modal from './ui/Modal';
-import FormField from './ui/FormField';
-import ModalButton from './ui/ModalButton';
-import ImageUpload from './ui/ImageUpload';
-import { bookSchema, type BookInput } from '../schemas/book.schemas';
-import { toInputDate } from '../lib/dateUtils';
+import Modal from './Modal';
+import FormField from '../ui/FormField';
+import ModalButton from './ModalButton';
+import ImageUpload from '../ui/ImageUpload';
+import { bookSchema, type BookInput } from '../../schemas/book.schemas';
+import { toInputDate } from '../../lib/dateUtils';
 
 const INPUT_BASE =
     'bg-white w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 transition    h-12';
@@ -38,6 +38,7 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData }: AddBookModalP
     const [errors, setErrors] = useState<Partial<Record<keyof BookInput, string>>>({});
     const [imagePreview, setImagePreview] = useState<string | null>(initialData?.book_img ?? null);
     const [submitting, setSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
     const [dateInputType, setDateInputType] = useState<'text' | 'date'>(
         initialData?.published_date ? 'date' : 'text'
     );
@@ -49,29 +50,31 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData }: AddBookModalP
         form.book_description.trim() !== '' &&
         form.book_img !== '';
 
-    useEffect(() => {
-        if (isOpen) {
-            setForm(normalizeInitialData(initialData));
-            setErrors({});
-            setImagePreview(initialData?.book_img ?? null);
-            setDateInputType(initialData?.published_date ? 'date' : 'text');
-        }
-    }, [isOpen, initialData]);
-
-    const handleClose = useCallback(() => {
+    const resetForm = useCallback(() => {
         setForm(normalizeInitialData(initialData));
         setErrors({});
         setImagePreview(initialData?.book_img ?? null);
         setDateInputType(initialData?.published_date ? 'date' : 'text');
-        onClose();
-    }, [onClose, initialData]);
+    }, [initialData]);
 
-    const handleChange =
-        (field: keyof BookInput) =>
+    useEffect(() => {
+        if (isOpen) resetForm();
+    }, [isOpen, resetForm]);
+
+    const handleClose = useCallback(() => {
+        resetForm();
+        onClose();
+    }, [onClose, resetForm]);
+
+    const handleChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-            setForm((prev) => ({ ...prev, [field]: e.target.value }));
-            if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
-        };
+            const field = e.target.name as keyof BookInput;
+            const { value } = e.target;
+            setForm((prev) => ({ ...prev, [field]: value }));
+            setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
+        },
+        []
+    );
 
     const handleImageChange = (base64: string) => {
         setImagePreview(base64);
@@ -93,6 +96,7 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData }: AddBookModalP
             return;
         }
 
+        setSubmitError(null);
         setSubmitting(true);
         try {
             await onSubmit(result.data);
@@ -100,6 +104,10 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData }: AddBookModalP
         } catch (err) {
             if (err instanceof z.ZodError) {
                 setErrors({ title: 'Erro de validação. Verifique os campos.' });
+            } else {
+                setSubmitError(
+                    err instanceof Error ? err.message : 'Ocorreu um erro inesperado. Tente novamente.'
+                );
             }
         } finally {
             setSubmitting(false);
@@ -114,8 +122,9 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData }: AddBookModalP
                         <FormField error={errors.title}>
                             <input
                                 type="text"
+                                name="title"
                                 value={form.title}
-                                onChange={handleChange('title')}
+                                onChange={handleChange}
                                 placeholder="Título"
                                 className={INPUT_BASE}
                             />
@@ -124,8 +133,9 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData }: AddBookModalP
                         <FormField error={errors.author}>
                             <input
                                 type="text"
+                                name="author"
                                 value={form.author}
-                                onChange={handleChange('author')}
+                                onChange={handleChange}
                                 placeholder="Autor"
                                 className={INPUT_BASE}
                             />
@@ -134,8 +144,9 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData }: AddBookModalP
                         <FormField error={errors.published_date}>
                             <input
                                 type={dateInputType}
+                                name="published_date"
                                 value={form.published_date}
-                                onChange={handleChange('published_date')}
+                                onChange={handleChange}
                                 onFocus={() => setDateInputType('date')}
                                 onBlur={() => { if (!form.published_date) setDateInputType('text'); }}
                                 placeholder="Data de publicação"
@@ -153,13 +164,18 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData }: AddBookModalP
 
                 <FormField error={errors.book_description}>
                     <textarea
+                        name="book_description"
                         value={form.book_description}
-                        onChange={handleChange('book_description')}
+                        onChange={handleChange}
                         placeholder="Descrição"
                         rows={4}
                         className={`${INPUT_BASE} h-50`}
                     />
                 </FormField>
+
+                {submitError && (
+                    <p className="text-sm text-red-500 text-center -mt-2">{submitError}</p>
+                )}
 
                 <div className="flex justify-center gap-6 pt-1">
                     <ModalButton

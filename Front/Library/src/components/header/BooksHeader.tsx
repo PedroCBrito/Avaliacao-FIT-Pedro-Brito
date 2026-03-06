@@ -1,6 +1,6 @@
 
-import HeaderButton from './HeaderButton';
-import SearchBar from './SearchBar';
+import HeaderButton from './header/HeaderButton';
+import SearchBar from './ui/SearchBar';
 
 interface BooksHeaderProps {
     onAddBook: () => void;

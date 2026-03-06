@@ -1,5 +1,7 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import pictureIcon from '../../assets/picture_png_icon.png';
+
+const MAX_SIZE_MB = 5;
 
 interface ImageUploadProps {
     preview: string | null;
@@ -9,10 +11,17 @@ interface ImageUploadProps {
 
 function ImageUpload({ preview, onChange, error }: ImageUploadProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [sizeError, setSizeError] = useState<string | null>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+        if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+            setSizeError(`A imagem deve ter no máximo ${MAX_SIZE_MB}MB.`);
+            e.target.value = '';
+            return;
+        }
+        setSizeError(null);
         const reader = new FileReader();
         reader.onload = () => onChange(reader.result as string);
         reader.readAsDataURL(file);
@@ -54,7 +63,7 @@ function ImageUpload({ preview, onChange, error }: ImageUploadProps) {
                 className="hidden"
                 aria-label="Upload de imagem da capa"
             />
-            {error && <p className="text-xs text-red-500">{error}</p>}
+            {(sizeError ?? error) && <p className="text-xs text-red-500">{sizeError ?? error}</p>}
         </div>
     );
 }

@@ -1,30 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useBooks } from '../hooks/useBooks';
-import BookFormModal from '../components/BookFormModal';
-import BookHeader from '../components/BookHeader';
-import DeleteModal from '../components/DeleteModal';
+import { useBook } from '../hooks/useBooks';
+import BookFormModal from '../components/modal/BookFormModal';
+import BookHeader from '../components/header/BookHeader';
+import DeleteModal from '../components/modal/DeleteModal';
 import BookDetails from '../components/BookDetails';
-import { type Book } from '../schemas/book.schemas';
 
 function BookPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [book, setBook] = useState<Book | null>(null);
-    const { loading, error, getBookById, updateBook, deleteBook } = useBooks();
-
-    useEffect(() => {
-        if (id) {
-            getBookById(id).then(setBook).catch(() => {});
-        }
-    }, [id, getBookById]);
+    const { book, loading, error, updateBook, deleteBook, isDeleting, deleteError } = useBook(id);
 
     const handleDeleteBook = async () => {
         if (!book) return;
-        await deleteBook(book.id);
-        navigate('/books');
+        try {
+            await deleteBook(book.id);
+            navigate('/books');
+        } catch {
+            // deleteError is surfaced via the hook state
+        }
     };
 
     return (
@@ -37,25 +33,22 @@ function BookPage() {
                 />
                 {loading && <p>Carregando...</p>}
                 {error && <p className="text-red-500">{error}</p>}
+                {book && <BookDetails book={book} />}
                 <DeleteModal
                     isOpen={isDeleteModalOpen}
                     onClose={() => setIsDeleteModalOpen(false)}
                     onConfirm={handleDeleteBook}
+                    loading={isDeleting}
+                    error={deleteError}
                 />
-                {book && (
-                    <>
-                        <BookDetails book={book} />
-                        <BookFormModal
-                            isOpen={isEditModalOpen}
-                            onClose={() => setIsEditModalOpen(false)}
-                            onSubmit={async (data) => {
-                                const updated = await updateBook(book.id, data);
-                                setBook(updated);
-                            }}
-                            initialData={book}
-                        />
-                    </>
-                )}
+                <BookFormModal
+                    isOpen={isEditModalOpen}
+                    onClose={() => setIsEditModalOpen(false)}
+                    onSubmit={async (data) => {
+                        if (book) await updateBook(book.id, data);
+                    }}
+                    initialData={book ?? undefined}
+                />
             </div>
         </div>
     );

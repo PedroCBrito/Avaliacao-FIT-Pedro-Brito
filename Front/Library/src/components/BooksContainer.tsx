@@ -1,5 +1,5 @@
 import type { Book } from '../schemas/book.schemas';
-import BookItemFrame from './BookItemFrame';
+import BookCard from './BookCard';
 
 interface BooksContainerProps {
     books: Book[];
@@ -27,7 +27,7 @@ function BooksContainer({ books, loading, error }: BooksContainerProps) {
     return (
         <div className="grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {books.map((book) => (
-                <BookItemFrame key={book.id} {...book} />
+                <BookCard key={book.id} {...book} />
             ))}
         </div>
     );

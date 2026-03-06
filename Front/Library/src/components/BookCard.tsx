@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import type { Book } from '../schemas/book.schemas';
 
-const BookItemFrame = memo(function BookItemFrame({ id, title, book_description, book_img }: Book) {
+const BookCard = memo(function BookCard({ id, title, book_description, book_img }: Book) {
     const imageSrc = book_img?.startsWith('http') || book_img?.startsWith('data:image') 
         ? book_img 
         : `data:image/jpeg;base64,${book_img}`;
@@ -21,4 +21,4 @@ const BookItemFrame = memo(function BookItemFrame({ id, title, book_description,
     );
 });
 
-export default BookItemFrame;
+export default BookCard;

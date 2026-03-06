@@ -34,6 +34,7 @@ const validBook = {
   author: 'Robert C. Martin',
   published_date: '2008-08-01',
   book_description: 'A Handbook of Agile Software Craftsmanship',
+  book_img: 'https://example.com/clean-code.jpg',
 };
 
 const savedBook = {
