@@ -40,7 +40,6 @@ server.setErrorHandler((error, request, reply) => {
     });
   }
 
-  // Erros de banco ou outros
   console.error(error);
   return reply.status(500).send({ message: 'Server Error' });
 });

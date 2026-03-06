@@ -12,7 +12,7 @@ export const bookSchema = z.object({
 
 export type BookInput = z.infer<typeof bookSchema>;
 
-// Schema para resposta da API (inclui campos gerados pelo servidor)
+// Schema for the API response (includes server-generated fields)
 export const bookResponseSchema = bookSchema.extend({
   id: z.number(),
   created_at: z.string().optional(),

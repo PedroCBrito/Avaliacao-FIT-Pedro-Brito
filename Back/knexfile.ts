@@ -15,7 +15,7 @@ const config: { [key: string]: Knex.Config } = {
     },
     pool: {
       min: 2,
-      max: 10, // Mantém entre 2 e 10 conexões abertas
+      max: 10,
     },
     migrations: {
       tableName: "knex_migrations",
