@@ -18,19 +18,7 @@ Aplicação web full-stack para gerenciamento de um acervo de livros — listar,
 
 ### 1. Configurar variáveis de ambiente
 
-Copie o arquivo de exemplo e defina a API Key:
-
-```bash
-cp .env.example .env
-```
-
-Edite `.env` e substitua o valor de `API_KEY`:
-
-```env
-API_KEY=minha-chave-secreta
-```
-
-> A `API_KEY` protege a API contra requisições externas. O frontend a envia automaticamente em todo request. Se omitida, a verificação é desativada (útil em desenvolvimento local sem Docker).
+O arquivo `.env` está disponivel no git porem de forma apenas a facilitar no envio da avalição, isso não é correto.
 
 ### 2. Subir os serviços
 
@@ -44,21 +32,6 @@ docker compose up --build
 |---|---|
 | Frontend | http://localhost |
 | API | http://localhost:5000 |
-
----
-
-## Comandos úteis
-
-```bash
-# Parar os serviços
-docker compose down
-
-# Parar e apagar dados do banco
-docker compose down -v
-
-# Reconstruir após mudanças
-docker compose up --build
-```
 
 ---
 
