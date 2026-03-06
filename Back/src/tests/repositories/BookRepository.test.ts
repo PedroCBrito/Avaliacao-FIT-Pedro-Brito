@@ -21,10 +21,11 @@ const bookData: Book = {
   author: 'Robert C. Martin',
   published_date: '2008-08-01',
   book_description: 'A Handbook of Agile Software Craftsmanship',
+  book_img: 'https://example.com/clean-code.jpg',
 };
 
 const savedBook = {
-  id: 'abc-123',
+  id: 1,
   ...bookData,
   created_at: new Date(),
   updated_at: new Date(),
@@ -73,9 +74,9 @@ describe('BookRepository', () => {
     it('should query by id and return the book', async () => {
       mockBuilder.first.mockResolvedValueOnce(savedBook);
 
-      const result = await repository.findById('abc-123');
+      const result = await repository.findById(1);
 
-      expect(mockBuilder.where).toHaveBeenCalledWith({ id: 'abc-123' });
+      expect(mockBuilder.where).toHaveBeenCalledWith({ id: 1 });
       expect(mockBuilder.first).toHaveBeenCalled();
       expect(result).toEqual(savedBook);
     });
@@ -83,7 +84,7 @@ describe('BookRepository', () => {
     it('should return undefined when the book is not found', async () => {
       mockBuilder.first.mockResolvedValueOnce(undefined);
 
-      const result = await repository.findById('nonexistent');
+      const result = await repository.findById(999);
 
       expect(result).toBeUndefined();
     });
@@ -109,13 +110,13 @@ describe('BookRepository', () => {
   // ═════════════════════════════════════════════════════════════════════════
   describe('update', () => {
     it('should update the book by id and return the updated record', async () => {
-      const updateData: Book = { id: 'abc-123', ...bookData };
+      const updateData: Book = { id: 1, ...bookData };
       mockBuilder.update.mockResolvedValueOnce(1);
       mockBuilder.first.mockResolvedValueOnce(savedBook);
 
       const result = await repository.update(updateData);
 
-      expect(mockBuilder.where).toHaveBeenCalledWith({ id: 'abc-123' });
+      expect(mockBuilder.where).toHaveBeenCalledWith({ id: 1 });
       expect(mockBuilder.update).toHaveBeenCalledWith(bookData); // id is stripped
       expect(result).toEqual(savedBook);
     });
@@ -132,9 +133,9 @@ describe('BookRepository', () => {
     it('should delete the book by id', async () => {
       mockBuilder.delete.mockResolvedValueOnce(1);
 
-      const result = await repository.delete('abc-123');
+      const result = await repository.delete(1);
 
-      expect(mockBuilder.where).toHaveBeenCalledWith({ id: 'abc-123' });
+      expect(mockBuilder.where).toHaveBeenCalledWith({ id: 1 });
       expect(mockBuilder.delete).toHaveBeenCalled();
       expect(result).toBe(1);
     });
@@ -142,7 +143,7 @@ describe('BookRepository', () => {
     it('should return 0 when the book does not exist', async () => {
       mockBuilder.delete.mockResolvedValueOnce(0);
 
-      const result = await repository.delete('nonexistent');
+      const result = await repository.delete(999);
 
       expect(result).toBe(0);
     });

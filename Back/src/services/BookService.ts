@@ -8,7 +8,7 @@ export class BookService {
     return this.repository.listAll();
   }
 
-  async findById(id: string) {
+  async findById(id: number) {
     return this.repository.findById(id);
   }
 
@@ -16,11 +16,11 @@ export class BookService {
     return this.repository.create(data);
   }
 
-  async update(id: string, data: BookInput) {
+  async update(id: number, data: BookInput) {
     return this.repository.update({ ...data, id });
   }
 
-  async delete(id: string) {
+  async delete(id: number) {
     return this.repository.delete(id);
   }
 }

@@ -14,7 +14,7 @@ export class BookController {
     request: FastifyRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
-    const { id } = request.params;
+    const id = Number(request.params.id);
     const book = await this.service.findById(id);
 
     if (!book) return reply.status(404).send({ message: 'Book not found' });
@@ -32,7 +32,7 @@ export class BookController {
     request: FastifyRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
-    const { id } = request.params;
+    const id = Number(request.params.id);
     const data = bookSchema.parse(request.body);
     const book = await this.service.update(id, data);
 
@@ -45,7 +45,7 @@ export class BookController {
     request: FastifyRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
-    const { id } = request.params;
+    const id = Number(request.params.id);
     await this.service.delete(id);
     return reply.status(204).send();
   }

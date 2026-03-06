@@ -8,6 +8,11 @@ export const router = createBrowserRouter([
         element: <Navigate to="/books" replace />,
     },
     {
+        path: '',
+        element: <Navigate to="/books" replace />,
+    },
+
+    {
         path: '/books',
         element: <BooksPage />,
     },

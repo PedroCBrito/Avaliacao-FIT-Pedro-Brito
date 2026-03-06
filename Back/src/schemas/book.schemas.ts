@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const bookSchema = z.object({
-  id: z.string().optional(),
+  id: z.number().optional(),
   title: z.string().min(3, "O título deve ter pelo menos 3 caracteres" ).max(255, "O título deve ter no máximo 255 caracteres"),
   author: z.string().min(3, "O nome do autor é obrigatório").max(255, "O nome do autor deve ter no máximo 255 caracteres"),
   published_date: z.string().refine(date => !isNaN(Date.parse(date)), {

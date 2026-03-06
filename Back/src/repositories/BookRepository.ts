@@ -1,7 +1,7 @@
 import connection from "./../database/connection";
 
 export interface Book {
-  id?: string;
+  id?: number;
   title: string;
   author: string;
   published_date: string;
@@ -16,7 +16,7 @@ export class BookRepository {
     return await connection('books').select('*').orderBy('created_at', 'desc');
   }
 
-  async findById(id: string) {
+  async findById(id: number) {
     return await connection('books').where({ id }).first();
   }
 
@@ -34,7 +34,7 @@ export class BookRepository {
     return await connection('books').where({ id: id }).first();
   }
 
-  async delete(id: string) {
+  async delete(id: number) {
     return await connection('books').where({ id }).delete();
   }
 }

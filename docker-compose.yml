@@ -8,12 +8,16 @@ services:
     environment:
       - PORT=5000
       - DB_HOST=db
+      - API_KEY=${API_KEY}
     restart: always
     depends_on:
       - db
 
   frontend:
-    build: ./Front/Library
+    build:
+      context: ./Front/Library
+      args:
+        VITE_API_KEY: ${API_KEY}
     ports:
       - "80:80"
     depends_on:

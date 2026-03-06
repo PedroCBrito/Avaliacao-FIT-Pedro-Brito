@@ -14,9 +14,17 @@ server.setValidatorCompiler(validatorCompiler);
 server.register(cors, {
   origin: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key']
 });
 
+server.addHook('onRequest', async (request, reply) => {
+  const expectedKey = process.env.API_KEY;
+  const providedKey = request.headers['x-api-key'];
+  
+  if (providedKey !== expectedKey) {
+    return reply.status(401).send({ message: 'Unauthorized' });
+  }
+});
 
 server.register(bookRoutes);
 

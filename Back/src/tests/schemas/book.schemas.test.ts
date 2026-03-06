@@ -20,10 +20,10 @@ describe('bookSchema', () => {
     });
 
     it('should accept a valid book with an optional id', () => {
-      const result = bookSchema.safeParse({ id: 'uuid-123', ...validData });
+      const result = bookSchema.safeParse({ id: 1, ...validData });
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.id).toBe('uuid-123');
+        expect(result.data.id).toBe(1);
       }
     });
 

@@ -38,7 +38,7 @@ const validBook = {
 };
 
 const savedBook = {
-  id: 'abc-123',
+  id: 1,
   ...validBook,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
@@ -75,7 +75,7 @@ describe('Book Routes', () => {
     });
 
     it('should return a list of books', async () => {
-      const books = [savedBook, { ...savedBook, id: 'def-456', title: 'The Pragmatic Programmer' }];
+      const books = [savedBook, { ...savedBook, id: 2, title: 'The Pragmatic Programmer' }];
       mockService.listAll.mockResolvedValueOnce(books);
 
       const response = await app.inject({ method: 'GET', url: '/books' });
@@ -105,13 +105,13 @@ describe('Book Routes', () => {
 
       const response = await app.inject({
         method: 'GET',
-        url: '/books/abc-123',
+        url: '/books/1',
       });
 
       expect(response.statusCode).toBe(200);
       expect(response.headers['content-type']).toMatch(/application\/json/);
       expect(response.json()).toEqual(savedBook);
-      expect(mockService.findById).toHaveBeenCalledWith('abc-123');
+      expect(mockService.findById).toHaveBeenCalledWith(1);
     });
 
     it('should return 404 when the book is not found', async () => {
@@ -119,7 +119,7 @@ describe('Book Routes', () => {
 
       const response = await app.inject({
         method: 'GET',
-        url: '/books/nonexistent',
+        url: '/books/999',
       });
 
       expect(response.statusCode).toBe(404);
@@ -131,7 +131,7 @@ describe('Book Routes', () => {
 
       const response = await app.inject({
         method: 'GET',
-        url: '/books/abc-123',
+        url: '/books/1',
       });
 
       expect(response.statusCode).toBe(500);
@@ -160,8 +160,8 @@ describe('Book Routes', () => {
     });
 
     it('should accept an optional id field', async () => {
-      const bookWithId = { id: 'custom-id', ...validBook };
-      mockService.create.mockResolvedValueOnce({ ...savedBook, id: 'custom-id' });
+      const bookWithId = { id: 1, ...validBook };
+      mockService.create.mockResolvedValueOnce(savedBook);
 
       const response = await app.inject({
         method: 'POST',
@@ -229,14 +229,14 @@ describe('Book Routes', () => {
 
       const response = await app.inject({
         method: 'PUT',
-        url: '/books/abc-123',
-        payload: { id: 'abc-123', ...validBook, title: 'Clean Code 2nd Ed' },
+        url: '/books/1',
+        payload: { id: 1, ...validBook, title: 'Clean Code 2nd Ed' },
       });
 
       expect(response.statusCode).toBe(200);
       expect(response.headers['content-type']).toMatch(/application\/json/);
       expect(response.json()).toEqual(updatedBook);
-      expect(mockService.update).toHaveBeenCalledWith('abc-123', { id: 'abc-123', ...validBook, title: 'Clean Code 2nd Ed' });
+      expect(mockService.update).toHaveBeenCalledWith(1, { id: 1, ...validBook, title: 'Clean Code 2nd Ed' });
     });
 
     it('should return 404 when the book to update does not exist', async () => {
@@ -244,8 +244,8 @@ describe('Book Routes', () => {
 
       const response = await app.inject({
         method: 'PUT',
-        url: '/books/abc-123',
-        payload: { id: 'nonexistent-id', ...validBook },
+        url: '/books/1',
+        payload: { ...validBook },
       });
 
       expect(response.statusCode).toBe(404);
@@ -255,7 +255,7 @@ describe('Book Routes', () => {
     it('should return 400 when body is empty', async () => {
       const response = await app.inject({
         method: 'PUT',
-        url: '/books/abc-123',
+        url: '/books/1',
       });
 
       expect(response.statusCode).toBe(400);
@@ -267,8 +267,8 @@ describe('Book Routes', () => {
 
       const response = await app.inject({
         method: 'PUT',
-        url: '/books/abc-123',
-        payload: { id: 'abc-123', ...validBook },
+        url: '/books/1',
+        payload: { ...validBook },
       });
 
       expect(response.statusCode).toBe(500);
@@ -285,11 +285,11 @@ describe('Book Routes', () => {
 
       const response = await app.inject({
         method: 'DELETE',
-        url: '/books/abc-123',
+        url: '/books/1',
       });
 
       expect(response.statusCode).toBe(204);
-      expect(mockService.delete).toHaveBeenCalledWith('abc-123');
+      expect(mockService.delete).toHaveBeenCalledWith(1);
       expect(response.body).toBe('');
     });
 
@@ -298,7 +298,7 @@ describe('Book Routes', () => {
 
       const response = await app.inject({
         method: 'DELETE',
-        url: '/books/abc-123',
+        url: '/books/1',
       });
 
       // Current implementation always returns 204 regardless of rows affected
@@ -310,7 +310,7 @@ describe('Book Routes', () => {
 
       const response = await app.inject({
         method: 'DELETE',
-        url: '/books/abc-123',
+        url: '/books/1',
       });
 
       expect(response.statusCode).toBe(500);
