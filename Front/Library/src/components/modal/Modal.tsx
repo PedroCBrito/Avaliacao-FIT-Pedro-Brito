@@ -22,11 +22,11 @@ function Modal({ isOpen, onClose, title, children }: ModalProps) {
 
     return createPortal(
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
             onClick={onClose}
         >
             <div
-                className="bg-gray-100 rounded-xl shadow-xl w-full max-w-3xl mx-4 p-6 flex flex-col gap-6"
+                className="bg-gray-100 rounded-xl shadow-xl w-full max-w-3xl p-6 flex flex-col gap-6 max-h-[90vh] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex items-center justify-center">

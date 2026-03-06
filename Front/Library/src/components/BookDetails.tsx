@@ -17,7 +17,7 @@ function BookCover({ src, title }: { src: string; title: string }) {
             <img
                 src={imageSrc}
                 alt={title}
-                className="w-60 h-64 object-cover"
+                className="w-48 sm:w-60 h-56 sm:h-64 object-cover"
             />
         </div>
     );
@@ -27,12 +27,12 @@ function BookMeta({ author, published_date }: { author: string; published_date: 
     const formattedDate = formatDateBR(published_date);
 
     return (
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-0">
             <div>
                 <p className="text-base text-black">Por {author}</p>
             </div>
-            <div className="text-right">
-                <p className="text-base text-lg text-black">Publicado em {formattedDate}</p>
+            <div className="sm:text-right">
+                <p className="text-base text-black">Publicado em {formattedDate}</p>
             </div>
         </div>
     );
@@ -50,15 +50,15 @@ const BookDetails = memo(function BookDetails({ book }: BookDetailsProps) {
     if (!book) return null;
 
     return (
-        <div className="flex gap-8 p-8">
-            <div className="flex flex-col gap-6 w-2/3">
-                <h1 className="text-4xl font-bold text-gray-900 leading-tight">{book.title}</h1>
+        <div className="flex flex-col-reverse md:flex-row gap-6 md:gap-8 p-4 sm:p-8">
+            <div className="flex flex-col gap-4 md:gap-6 w-full md:w-2/3">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 leading-tight">{book.title}</h1>
                 <BookMeta author={book.author} published_date={book.published_date} />
             
                 <BookDescription description={book.book_description} />
             </div>
             
-            <div className="w-1/3 shrink-0">
+            <div className="w-full md:w-1/3 shrink-0">
                 <BookCover src={book.book_img} title={book.title} />
             </div>
         </div>

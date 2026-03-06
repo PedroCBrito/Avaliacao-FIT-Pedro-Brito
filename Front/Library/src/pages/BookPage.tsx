@@ -24,8 +24,8 @@ function BookPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
-            <div className="container mx-auto p-6">
+        <div className="min-h-screen bg-gray-100 p-4 sm:p-6">
+            <div className="container mx-auto px-2 sm:px-6 py-4 sm:py-6">
                 <BookHeader
                     onEditBook={() => setIsEditModalOpen(true)}
                     backToHome={() => navigate('/books')}

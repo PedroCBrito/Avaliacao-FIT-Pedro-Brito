@@ -13,7 +13,7 @@ function ModalButton({ variant = 'primary', children, className = '', ...props }
 
     return (
         <button
-            className={`px-12 py-4 rounded-full font-medium text-base transition cursor-pointer disabled:cursor-not-allowed ${variants[variant]} ${className}`.trim()}
+            className={`px-6 sm:px-12 py-3 sm:py-4 rounded-full font-medium text-sm sm:text-base transition cursor-pointer disabled:cursor-not-allowed ${variants[variant]} ${className}`.trim()}
             {...props}
         >
             {children}

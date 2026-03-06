@@ -117,7 +117,7 @@ function BookFormModal({ isOpen, onClose, onSubmit, initialData }: AddBookModalP
     return (
         <Modal isOpen={isOpen} onClose={handleClose} title={initialData ? 'Editar Livro' : 'Novo Livro'}>
             <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-                <div className="flex gap-5">
+                <div className="flex flex-col sm:flex-row gap-5">
                     <div className="flex flex-col gap-4 flex-[2]">
                         <FormField error={errors.title}>
                             <input
