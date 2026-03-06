@@ -1,14 +1,13 @@
-import { useEffect } from "react";
-import { useBooks } from "../hooks/useBooks";
-import BookItemFrame from "./BookItemFrame";
+import type { Book } from '../schemas/book.schemas';
+import BookItemFrame from './BookItemFrame';
 
-function BooksContainer() {
-    const { books, loading, error, fetchBooks } = useBooks();
+interface BooksContainerProps {
+    books: Book[];
+    loading: boolean;
+    error: string | null;
+}
 
-    useEffect(() => {
-        fetchBooks().catch(() => {});
-    }, [fetchBooks]);
-
+function BooksContainer({ books, loading, error }: BooksContainerProps) {
     if (loading) {
         return (
             <div className="flex justify-center py-10">

@@ -7,7 +7,7 @@ export const bookSchema = z.object({
     message: "Invalid date format",
   }),
   book_description: z.string().min(10),
-  book_img: z.string(),
+  book_img: z.string().min(1, "A imagem é obrigatória"),
 });
 
 export type BookInput = z.infer<typeof bookSchema>;
